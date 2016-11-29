@@ -3,6 +3,7 @@ require 'fileutils'
 require 'nokogiri'
 require 'aws-sdk'
 require 'logger'
+require 'openssl'
 
 module Staticizer
   class Crawler
@@ -113,7 +114,7 @@ module Staticizer
 
     def save_page_to_disk(response, uri)
       path = uri.path
-      path += "?#{uri.query}" if uri.query
+      # path += "?#{uri.query}" if uri.query
 
       path_segments = path.scan(%r{[^/]*/})
       filename = path.include?("/") ? path[path.rindex("/")+1..-1] : path
@@ -158,7 +159,6 @@ module Staticizer
     def save_page_to_aws(response, uri)
       key = uri.path
       key += "?#{uri.query}" if uri.query
-      key = key.gsub(%r{/$},"/index.html")
       key = key.gsub(%r{^/},"")
       key = "index.html" if key == ""
       # Upload this file directly to AWS::S3
@@ -223,6 +223,7 @@ module Staticizer
       if connection.nil?
         connection = Net::HTTP.new(parsed_uri.host, parsed_uri.port)
         connection.use_ssl = true if parsed_uri.scheme.downcase == "https"
+        connection.verify_mode = OpenSSL::SSL::VERIFY_NONE
         @http_connections[key] = connection
       end
 
