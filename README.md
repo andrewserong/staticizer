@@ -2,6 +2,10 @@
 
 A tool to create a static version of a website for hosting on S3.
 
+## Notes on this fork:
+
+This fork switches over to `OpenSSL::SSL::VERIFY_NONE` and removes the `uri.query` parameters. This was for the specific needs of a particular project, but probably makes this fork ***unsafe*** to use normally!
+
 ## Rationale
 
 One of our clients needed a reliable emergency backup for a
