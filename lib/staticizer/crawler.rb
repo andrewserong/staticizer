@@ -232,12 +232,16 @@ module Staticizer
         connection.request(request) do |response|
           case response
           when Net::HTTPSuccess
-            process_success(response, parsed_uri)
+            if parsed_uri.to_s.start_with?('%20') != true
+              process_success(response, parsed_uri)
+            end
           when Net::HTTPRedirection
             redirect_url = response['location']
             @log.debug "Processing redirect to #{redirect_url}"
-            process_redirect(parsed_uri, redirect_url)
-            add_url(redirect_url)
+            if parsed_uri.to_s.start_with?('%20') != true
+              process_redirect(parsed_uri, redirect_url)
+              add_url(redirect_url)
+            end
           else
             @log.error "Error #{response.code}:#{response.message} fetching url #{url}"
           end
@@ -245,6 +249,8 @@ module Staticizer
       rescue OpenSSL::SSL::SSLError => e
         @log.error "SSL Error #{e.message} fetching url #{url}"
       rescue Errno::ECONNRESET => e
+        @log.error "Error #{e.class}:#{e.message} fetching url #{url}"
+      rescue Exception => e
         @log.error "Error #{e.class}:#{e.message} fetching url #{url}"
       end
     end
